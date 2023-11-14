@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Hours</title>
+</head>
+
+<body>
+    <h1>Store Hours</h1>
+    <ul>
+        {% for store_hour in store_hours %}
+        <li>
+            {{ store_hour.opening_time.strftime('%H:%M') }} - {{ store_hour.closing_time.strftime('%H:%M') }}
+            (Waiting Time: {{ store_hour.waiting_time }} minutes)
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="add.html">Add Store Hour</a>
+</body>
+
+</html>
