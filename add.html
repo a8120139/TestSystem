@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Store Hour</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+
+<body>
+    <h1>Add Store Hour</h1>
+    <form method="post" action="add.html" id="addStoreHourForm">
+        <label for="opening_time">Opening Time:</label>
+        <input type="time" id="opening_time" name="opening_time" required>
+        <br>
+        <label for="closing_time">Closing Time:</label>
+        <input type="time" id="closing_time" name="closing_time" required>
+        <br>
+        <label for="waiting_time">Waiting Time:</label>
+        <select id="waiting_time" name="waiting_time" required>
+            <option value="0">0 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60">60 minutes</option>
+            <option value="90">90 minutes</option>
+            <option value="120">120 minutes</option>
+        </select>
+        <br>
+        <input type="submit" value="Add">
+    </form>
+    <a href="index.html">Back to Store Hours</a>
+
+    <script>
+        // 追加されたデータを表示する関数
+        function displayNewStoreHour(storeHour) {
+            $("#store-hours-list").append("<li>" + storeHour.opening_time + " - " + storeHour.closing_time + " (Waiting Time: " + storeHour.waiting_time + " minutes)</li>");
+        }
+
+        // フォームが送信されたときの処理
+        $("#addStoreHourForm").submit(function (event) {
+            event.preventDefault(); // フォームの通常の送信を防ぐ
+
+            // フォームデータを取得
+            var formData = {
+                opening_time: $("#opening_time").val(),
+                closing_time: $("#closing_time").val(),
+                waiting_time: $("#waiting_time").val()
+            };
+
+            // データをサーバーに送信
+            $.ajax({
+                url: "/add_store_hour",
+                type: "POST",
+                data: formData,
+                success: function (data) {
+                    // 新しいデータが追加されたら表示
+                    displayNewStoreHour(data);
+
+                    // フォームをリセット
+                    $("#addStoreHourForm")[0].reset();
+                },
+                error: function (error) {
+                    console.log("Error adding store hour: ", error);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
