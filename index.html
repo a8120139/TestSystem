@@ -1,22 +1,61 @@
-<!-- index.html -->
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Store Hours</title>
 </head>
 
 <body>
     <h1>Store Hours</h1>
-    <ul>
-        {% for hour in store_hours %}
-        <li>{{ hour }}</li>
-        {% endfor %}
-    </ul>
-    <a href="/add">Add Store Hour</a>
+
+    <form id="storeHoursForm">
+        <label for="openingTime">Opening Time:</label>
+        <input type="time" id="openingTime" name="openingTime" required>
+        <br>
+        <label for="closingTime">Closing Time:</label>
+        <input type="time" id="closingTime" name="closingTime" required>
+        <br>
+        <label for="waitingTime">Waiting Time:</label>
+        <select id="waitingTime" name="waitingTime" required>
+            <option value="0">0 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60">60 minutes</option>
+            <option value="90">90 minutes</option>
+            <option value="120">120 minutes</option>
+        </select>
+        <br>
+        <button type="submit">Add Store Hour</button>
+    </form>
+
+    <ul id="storeHoursList"></ul>
+
+    <script>
+        const form = document.getElementById('storeHoursForm');
+        const storeHoursList = document.getElementById('storeHoursList');
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+
+            fetch('http://localhost:3000/add_store_hour', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    displayNewStoreHour(data);
+                    form.reset();
+                })
+                .catch(error => console.error('Error adding store hour:', error));
+        });
+
+        function displayNewStoreHour(storeHour) {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${storeHour.opening_time} - ${storeHour.closing_time} (Waiting Time: ${storeHour.waiting_time} minutes)`;
+            storeHoursList.appendChild(listItem);
+        }
+    </script>
 </body>
 
 </html>
-``

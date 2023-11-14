@@ -1,0 +1,22 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Hours</title>
+</head>
+
+<body>
+    <h1>Store Hours</h1>
+    <ul>
+        {% for hour in store_hours %}
+        <li>{{ hour }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/add">Add Store Hour</a>
+</body>
+
+</html>
+``
