@@ -1,68 +1,55 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+import sqlite3
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///store_hours.db'
-db = SQLAlchemy(app)
 
-from sqlalchemy import CheckConstraint
+# SQLiteデータベースへの接続
+conn = sqlite3.connect('store_hours.db')
+cur = conn.cursor()
 
-class StoreHours(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    opening_time = db.Column(db.Time)
-    closing_time = db.Column(db.Time)
-    waiting_time = db.Column(db.Integer, default=0, nullable=False)
-    
-    __table_args__ = (
-        CheckConstraint('waiting_time IN (0, 30, 60, 90, 120)', name='check_waiting_time'),
+# テーブルの作成
+cur.execute('''
+    CREATE TABLE IF NOT EXISTS store_hours (
+        id INTEGER PRIMARY KEY,
+        opening_time TIME,
+        closing_time TIME,
+        waiting_time INTEGER CHECK (waiting_time IN (0, 30, 60, 90, 120))
     )
+''')
+conn.commit()
 
-# トリガーを模倣する関数
-def update_waiting_time_after_insert(mapper, connection, target):
-    store_hour = target
-    if store_hour.waiting_time > 0:
-        store_hour.waiting_time -= 30
+# トリガーの作成
+cur.execute('''
+    CREATE TRIGGER IF NOT EXISTS update_waiting_time
+    AFTER INSERT ON store_hours
+    FOR EACH ROW
+    BEGIN
+        UPDATE store_hours
+        SET waiting_time = waiting_time - 30
+        WHERE id = NEW.id AND waiting_time > 0;
+    END
+''')
+conn.commit()
 
-# トリガーの登録
-db.event.listen(StoreHours, 'after_insert', update_waiting_time_after_insert)
-
-@app.route('/')
-def index():
-    store_hours = StoreHours.query.all()
-    return render_template('index.html', store_hours=store_hours)
-
+# データの追加
 @app.route('/add', methods=['GET', 'POST'])
 def add():
     if request.method == 'POST':
-        opening_time = datetime.strptime(request.form['opening_time'], '%H:%M').time()
-        closing_time = datetime.strptime(request.form['closing_time'], '%H:%M').time()
-        waiting_time = int(request.form['waiting_time'])
-        
-        new_store_hour = StoreHours(opening_time=opening_time, closing_time=closing_time, waiting_time=waiting_time)
-        db.session.add(new_store_hour)
-        db.session.commit()
+        opening_time = request.form['opening_time']
+        closing_time = request.form['closing_time']
+        waiting_time = request.form['waiting_time']
+
+        cur.execute('INSERT INTO store_hours (opening_time, closing_time, waiting_time) VALUES (?, ?, ?)', (opening_time, closing_time, waiting_time))
+        conn.commit()
         return redirect(url_for('index'))
     return render_template('add.html')
 
+# データの閲覧
+@app.route('/')
+def index():
+    cur.execute('SELECT * FROM store_hours')
+    store_hours = cur.fetchall()
+    return render_template('index.html', store_hours=store_hours)
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
-
-from flask import jsonify
-
-# ...
-
-@app.route('/get_store_hours', methods=['GET'])
-def get_store_hours():
-    store_hours = StoreHours.query.all()
-    store_hours_list = [{
-        'opening_time': str(hour.opening_time),
-        'closing_time': str(hour.closing_time),
-        'waiting_time': hour.waiting_time
-    } for hour in store_hours]
-    return jsonify(store_hours_list)
-
-# ...
-
