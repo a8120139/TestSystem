@@ -10,7 +10,7 @@
 
 <body>
     <h1>Add Store Hour</h1>
-    <form method="post" action="/add_store_hour" id="addStoreHourForm"> <!-- action属性を修正 -->
+    <form method="post" action="/add_store_hour" id="addStoreHourForm">
         <label for="opening_time">Opening Time:</label>
         <input type="time" id="opening_time" name="opening_time" required>
         <br>
@@ -50,7 +50,7 @@
 
             // データをサーバーに送信
             $.ajax({
-                url: "/add_store_hour",
+                url: "http://localhost:8000/add_store_hour", // ローカルサーバーのエンドポイントに変更
                 type: "POST",
                 data: formData,
                 success: function (data) {
