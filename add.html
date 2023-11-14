@@ -10,7 +10,7 @@
 
 <body>
     <h1>Add Store Hour</h1>
-    <form method="post" action="add.html" id="addStoreHourForm">
+    <form method="post" action="/add_store_hour" id="addStoreHourForm"> <!-- action属性を修正 -->
         <label for="opening_time">Opening Time:</label>
         <input type="time" id="opening_time" name="opening_time" required>
         <br>
@@ -28,6 +28,7 @@
         <br>
         <input type="submit" value="Add">
     </form>
+
     <a href="index.html">Back to Store Hours</a>
 
     <script>
