@@ -3,58 +3,41 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Store Hours</title>
+    <title>Google Sheetsに書き込む</title>
 </head>
 
 <body>
-    <h1>Store Hours</h1>
-
-    <form id="storeHoursForm">
-        <label for="openingTime">Opening Time:</label>
-        <input type="time" id="openingTime" name="openingTime" required>
-        <br>
-        <label for="closingTime">Closing Time:</label>
-        <input type="time" id="closingTime" name="closingTime" required>
-        <br>
-        <label for="waitingTime">Waiting Time:</label>
-        <select id="waitingTime" name="waitingTime" required>
-            <option value="0">0 minutes</option>
-            <option value="30">30 minutes</option>
-            <option value="60">60 minutes</option>
-            <option value="90">90 minutes</option>
-            <option value="120">120 minutes</option>
-        </select>
-        <br>
-        <button type="submit">Add Store Hour</button>
+    <h1>Google Sheetsにデータを書き込む</h1>
+    <form id="data-form">
+        <label for="name">名前:</label>
+        <input type="text" id="name" name="name">
+        <label for="age">年齢:</label>
+        <input type="number" id="age" name="age">
+        <button type="submit">送信</button>
     </form>
 
-    <ul id="storeHoursList"></ul>
-
     <script>
-        const form = document.getElementById('storeHoursForm');
-        const storeHoursList = document.getElementById('storeHoursList');
+        document.getElementById('data-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
 
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const formData = new FormData(form);
-
-            fetch('http://localhost:3000/add_store_hour', {
+            fetch('/submit', {
                 method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    displayNewStoreHour(data);
-                    form.reset();
-                })
-                .catch(error => console.error('Error adding store hour:', error));
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, age })
+            }).then(response => {
+                if (response.ok) {
+                    alert('データを書き込みました！');
+                } else {
+                    alert('データの書き込みに失敗しました。');
+                }
+            }).catch(error => {
+                console.error('エラー:', error);
+            });
         });
-
-        function displayNewStoreHour(storeHour) {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${storeHour.opening_time} - ${storeHour.closing_time} (Waiting Time: ${storeHour.waiting_time} minutes)`;
-            storeHoursList.appendChild(listItem);
-        }
     </script>
 </body>
 

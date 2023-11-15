@@ -1,55 +1,31 @@
-from flask import Flask, render_template, request, redirect, url_for
-import sqlite3
+from flask import Flask, render_template, request
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 app = Flask(__name__)
 
-# SQLiteデータベースへの接続
-conn = sqlite3.connect('store_hours.db')
-cur = conn.cursor()
+# Google Sheetsへの書き込み処理
+@app.route('/submit', methods=['POST'])
+def submit():
+    name = request.json['name']
+    age = request.json['age']
 
-# テーブルの作成
-cur.execute('''
-    CREATE TABLE IF NOT EXISTS store_hours (
-        id INTEGER PRIMARY KEY,
-        opening_time TIME,
-        closing_time TIME,
-        waiting_time INTEGER CHECK (waiting_time IN (0, 30, 60, 90, 120))
-    )
-''')
-conn.commit()
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    credentials = ServiceAccountCredentials.from_json_keyfile_name('YOUR_KEY.json', scope)
+    gc = gspread.authorize(credentials)
 
-# トリガーの作成
-cur.execute('''
-    CREATE TRIGGER IF NOT EXISTS update_waiting_time
-    AFTER INSERT ON store_hours
-    FOR EACH ROW
-    BEGIN
-        UPDATE store_hours
-        SET waiting_time = waiting_time - 30
-        WHERE id = NEW.id AND waiting_time > 0;
-    END
-''')
-conn.commit()
+    SPREADSHEET_KEY = 'YOUR_SPREADSHEET_KEY'
+    sheet = gc.open_by_key(SPREADSHEET_KEY).sheet1  # シート1を開く
 
-# データの追加
-@app.route('/add', methods=['GET', 'POST'])
-def add():
-    if request.method == 'POST':
-        opening_time = request.form['opening_time']
-        closing_time = request.form['closing_time']
-        waiting_time = request.form['waiting_time']
+    # データを書き込む
+    row_values = [name, age]
+    sheet.append_row(row_values)
 
-        cur.execute('INSERT INTO store_hours (opening_time, closing_time, waiting_time) VALUES (?, ?, ?)', (opening_time, closing_time, waiting_time))
-        conn.commit()
-        return redirect(url_for('index'))
-    return render_template('add.html')
+    return '', 200  # 成功を示すレスポンスコード
 
-# データの閲覧
 @app.route('/')
 def index():
-    cur.execute('SELECT * FROM store_hours')
-    store_hours = cur.fetchall()
-    return render_template('index.html', store_hours=store_hours)
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
