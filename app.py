@@ -10,8 +10,9 @@ def submit():
     name = request.json['name']
     age = request.json['age']
 
+    # Google Sheetsへのアクセス
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name('C:\Users\ibkts\マイドライブ\ゼミ\卒研\google api system\my-project-test-405202-fe81b9896c8f.json', scope)
+    credentials = ServiceAccountCredentials.from_json_keyfile_name("C:\Users\ibkts\マイドライブ\ゼミ\卒研\google api system\my-project-test-405202-fe81b9896c8f.json", scope)
     gc = gspread.authorize(credentials)
 
     SPREADSHEET_KEY = 'https://docs.google.com/spreadsheets/d/11UkXbnWDS1LaQ-7H2g4xI_K_FtOAxlAZDnV85kww77Q/edit?usp=sharing'
