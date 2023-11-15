@@ -11,10 +11,10 @@ def submit():
     age = request.json['age']
 
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name('YOUR_KEY.json', scope)
+    credentials = ServiceAccountCredentials.from_json_keyfile_name('C:\Users\ibkts\マイドライブ\ゼミ\卒研\google api system\my-project-test-405202-fe81b9896c8f.json', scope)
     gc = gspread.authorize(credentials)
 
-    SPREADSHEET_KEY = 'YOUR_SPREADSHEET_KEY'
+    SPREADSHEET_KEY = 'https://docs.google.com/spreadsheets/d/11UkXbnWDS1LaQ-7H2g4xI_K_FtOAxlAZDnV85kww77Q/edit?usp=sharing'
     sheet = gc.open_by_key(SPREADSHEET_KEY).sheet1  # シート1を開く
 
     # データを書き込む
